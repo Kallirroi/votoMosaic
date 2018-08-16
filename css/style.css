@@ -1,9 +1,11 @@
-/*#e6e5e5
+/*
+#e6e5e5
 #282828
 #d05141
 #cf7a6e
 #979796
-#6c746c*/
+#6c746c
+*/
 
 
 * {
@@ -50,8 +52,14 @@ li {
   list-style: none;
 }
 
-.text {
-  margin: 1vh 0;
+button {
+  padding: 1em;
+  border-radius: 0.2em;
+  border: 1px solid #6c746c;
+  display: block;
+  cursor: pointer;
+  background: #fff;
+  margin: 10vh auto;
 }
 
 #tile-container {
@@ -89,4 +97,14 @@ li {
 
 .tile > input , .tile-clicked > input {
   width: 0px;
+}
+
+.doc-id {
+  font-size: 0.85em;
+  text-align: center;
+  color: rgba(0,0,0,0.5);
+  margin: 2vh 0;
+}
+.doc-id span {
+  border-bottom: 2px solid #7070ff;
 }

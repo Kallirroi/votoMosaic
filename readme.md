@@ -15,10 +15,11 @@ the updates need to be synced to the other instance (`this.props.hm.on('document
 
 
 ==To be done==
-- [ ] create an intro view where you enter the mosaic
-- [ ] add the `docId` to the main mosaic view
-- [ ] add an input field that accepts the `docId`
-- [ ] there should be a `peer:joined` event when that happens
+- [x] move the instructions to an intro view where you click on a button to enter an existing mosaic or create a new one
+- [ ] do I need to create a new doc in the first view, or to open an existing one?
+- [x] add the `docId` to the main mosaic view
+- [x] add an input field that accepts the `docId`
+- [x] there should be a `peer:joined` event when that happens
 - [ ] connect tile state change to hypermerge
 - [ ] handle updates
 - [ ] copy photo locally (or convert to `base64`)
