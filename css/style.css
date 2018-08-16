@@ -1,0 +1,92 @@
+/*#e6e5e5
+#282828
+#d05141
+#cf7a6e
+#979796
+#6c746c*/
+
+
+* {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body {
+  padding: 0;
+  font-family: 'Helvetica', sans-serif;
+  background: ##e6e5e5;
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.02rem;
+  line-height: 1.5;
+  color: ##282828;
+}
+
+main {
+  padding: 2em;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+h1.title {
+  font-weight: 500;
+  font-size: 64px;
+  margin: 0;
+  color: #d05141;
+  text-align: center;
+}
+
+hr {
+  opacity: 0.2;
+  border-color: ##282828;
+  width: 30vw;
+  text-align: center;
+  margin: 2vh auto;
+}
+
+
+li {
+  list-style: none;
+}
+
+.text {
+  margin: 1vh 0;
+}
+
+#tile-container {
+  width: auto;
+  display: flex; 
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+
+.tile {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  align-self: flex-start ;
+  border: 1px solid #6c746c;
+}
+
+.tile-clicked {
+  width: 20px;
+  height: 20px;
+  margin: 1px;
+  align-self: flex-start ;
+  border: 1px solid #d05141;
+  background: #d05141;
+}
+
+.tile:hover {
+  filter: drop-shadow(6px 6px 20px   #282828);
+  background: #6c746c;
+  border: none;
+}
+
+.tile > input , .tile-clicked > input {
+  width: 0px;
+}
