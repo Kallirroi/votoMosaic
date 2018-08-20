@@ -29564,11 +29564,18 @@ hm.once('ready', function (hm) {
   }); // getting an error with utp?
 
   var id = hm.swarm.id.toString('hex');
-  console.log("My ID: ".concat(id));
+  console.log("My peer id is: ".concat(id)); // hm.create();
+
+  var docsIds = Object.keys(hm.docs).map(function (docId) {
+    return docId;
+  });
+  var docId = docsIds ? docsIds[0] : null;
+  console.log('this docId is ', docId);
   var main = document.getElementById('main');
   (0, _reactDom.render)(_react.default.createElement(_App.default, {
     hm: hm,
-    id: id
+    id: id,
+    docId: docId
   }), main);
 });
 
@@ -35261,7 +35268,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this, props));
     _this.state = {
-      doc: null,
+      doc: _this.props.hm.docs[_this.props.docId],
       name: '',
       peers: [],
       docs: [],
@@ -35279,6 +35286,98 @@ function (_Component) {
   }
 
   _createClass(App, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      console.log('initialing mosaic');
+      var mosaicSize = 392;
+
+      for (var i = mosaicSize - 1; i >= 0; i--) {
+        this.state.tiles.push(false);
+      }
+
+      console.log('selecting document with docId', this.props.docId);
+      this.selectDocument(this.props.docId); // handle peer functions
+      // this.props.hm.on('peer:message', (actorId, peer, msg) => {
+      //   // keep track of peer ids
+      //   if (msg.type === 'hi') {
+      //     let peerIds = this.state.peerIds;
+      //     let id = peer.remoteId.toString('hex');
+      //     peerIds[id] = msg.id;
+      //   }
+      // });
+      // this.props.hm.on('peer:joined', (actorId, peer) => {
+      //   // tell new peers this peer's id
+      //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
+      //   this.setState({ peers: this.uniquePeers(this.state.doc) });
+      //   console.log(this.props.id , 'joined this document')
+      // });
+      // this.props.hm.on('peer:left', (actorId, peer) => {
+      //   if (this.state.doc && peer.remoteId) {
+      //     // remove the leaving peer from the editor
+      //     let id = peer.remoteId.toString('hex');
+      //     id = this.state.peerIds[id];
+      //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+      //       delete changeDoc.peers[id];
+      //       console.log('a peer left')
+      //     });
+      //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+      //   }
+      // });
+      // // remove self when closing window
+      // window.onbeforeunload = () => {
+      //   let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+      //     delete changeDoc.peers[this.props.id];
+      //   });
+      //   console.log('I left the doc')
+      // }
+    }
+  }, {
+    key: "uniquePeers",
+    value: function uniquePeers(doc) {
+      // count unique peers on document
+      if (doc) {
+        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
+        return _toConsumableArray(new Set(peers.filter(function (p) {
+          return p.remoteId;
+        }).map(function (p) {
+          return p.remoteId.toString('hex');
+        })));
+      }
+
+      return [];
+    }
+  }, {
+    key: "listenForDocument",
+    value: function listenForDocument() {
+      var _this2 = this;
+
+      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
+        console.log('listening for document');
+
+        _this2.setState({
+          peers: _this2.uniquePeers(doc)
+        });
+      });
+    }
+  }, {
+    key: "selectDocument",
+    value: function selectDocument(selected) {
+      var docId = selected.value;
+      console.log('selected doc');
+      this.openDocument(docId);
+    }
+  }, {
+    key: "openDocument",
+    value: function openDocument(docId) {
+      try {
+        this.props.hm.open(docId);
+        this.listenForDocument();
+        console.log('opened doc');
+      } catch (e) {
+        console.log('something went wrong with opening the document', e);
+      }
+    }
+  }, {
     key: "handleClick",
     value: function handleClick(e, tile) {
       e.preventDefault(); //update clicked tile to true
@@ -35298,225 +35397,35 @@ function (_Component) {
       console.log(file.path, 'ok now what? ');
     }
   }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      //initialize mosaic
-      var mosaicSize = 392;
-
-      for (var i = mosaicSize - 1; i >= 0; i--) {
-        this.state.tiles.push(false);
-      }
-
-      this.props.hm.on('peer:message', function (actorId, peer, msg) {
-        // keep track of peer ids
-        if (msg.type === 'hi') {
-          var peerIds = _this2.state.peerIds;
-          var id = peer.remoteId.toString('hex');
-          peerIds[id] = msg.id;
-        }
-      });
-      this.props.hm.on('peer:joined', function (actorId, peer) {
-        // tell new peers this peer's id
-        _this2.props.hm._messagePeer(peer, {
-          type: 'hi',
-          id: _this2.props.id
-        });
-
-        _this2.setState({
-          peers: _this2.uniquePeers(_this2.state.doc)
-        });
-
-        console.log('a peer joined');
-      });
-      this.props.hm.on('peer:left', function (actorId, peer) {
-        if (_this2.state.doc && peer.remoteId) {
-          // remove the leaving peer from the editor
-          var id = peer.remoteId.toString('hex');
-          id = _this2.state.peerIds[id];
-
-          var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
-            delete changeDoc.peers[id];
-            console.log('a peer left');
-          });
-
-          _this2.setState({
-            doc: changedDoc,
-            peers: _this2.uniquePeers(_this2.state.doc)
-          });
-        }
-      }); // remove self when closing window
-
-      window.onbeforeunload = function () {
-        var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
-          delete changeDoc.peers[_this2.props.id];
-        });
-
-        console.log('I left the doc');
-      };
-
-      this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
-        if (_this2.state.doc && _this2.props.hm.getId(_this2.state.doc) == docId) {
-          var diff = _automerge.default.diff(prevDoc, doc);
-
-          var lastDiffs = diff.filter(function (d) {
-            return d.type === 'text';
-          });
-
-          _this2.setState({
-            doc: doc,
-            lastDiffs: lastDiffs
-          });
-
-          _this2.updateDocsList();
-        }
-      });
-      this.props.hm.on('document:ready', function (docId, doc, prevDoc) {
-        _this2.updateDocsList();
-      });
-    }
-  }, {
-    key: "listenForDocument",
-    value: function listenForDocument() {
-      var _this3 = this;
-
-      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
-        var changedDoc = _this3.props.hm.change(doc, function (changeDoc) {
-          if (!changeDoc.text) {
-            changeDoc.text = new _automerge.default.Text();
-            changeDoc.title = 'Untitled';
-            changeDoc.peers = {};
-          }
-
-          changeDoc.peers[_this3.props.id] = {
-            name: _this3.state.name
-          };
-        });
-
-        _this3.setState({
-          doc: changedDoc,
-          peers: _this3.uniquePeers(doc)
-        });
-      });
-      console.log('listened for doc');
-    }
-  }, {
-    key: "createNewDocument",
-    value: function createNewDocument() {
-      this.props.hm.create();
-      this.listenForDocument();
-      console.log('created doc');
-    }
-  }, {
-    key: "selectDocument",
-    value: function selectDocument(selected) {
-      var docId = selected.value;
-      this.openDocument(docId);
-      console.log('selected doc');
-    }
-  }, {
-    key: "openDocument",
-    value: function openDocument(docId) {
-      var _this4 = this;
-
-      try {
-        if (this.props.hm.has(docId)) {
-          var doc = this.props.hm.find(docId);
-          doc = this.props.hm.change(doc, function (changeDoc) {
-            changeDoc.peers[_this4.props.id] = {
-              name: _this4.state.name
-            };
-          });
-          this.setState({
-            doc: doc,
-            peers: this.uniquePeers(doc)
-          });
-        } else {
-          this.props.hm.open(docId);
-          this.listenForDocument();
-        }
-
-        console.log('opened doc');
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  }, {
-    key: "updateDocsList",
-    value: function updateDocsList() {
-      var _this5 = this;
-
-      var docs = Object.keys(this.props.hm.docs).map(function (docId) {
-        return {
-          value: docId,
-          label: _this5.props.hm.docs[docId].title
-        };
-      }).filter(function (d) {
-        return d.label;
-      });
-      this.setState({
-        docs: docs
-      });
-      console.log('updated doc');
-    }
-  }, {
-    key: "uniquePeers",
-    value: function uniquePeers(doc) {
-      // count unique peers on document
-      if (doc) {
-        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
-        return _toConsumableArray(new Set(peers.filter(function (p) {
-          return p.remoteId;
-        }).map(function (p) {
-          return p.remoteId.toString('hex');
-        })));
-      }
-
-      return [];
-    }
-  }, {
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this3 = this;
 
       var main;
 
       if (this.state.doc) {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
-        }, "votePlace"), _react.default.createElement("hr", null), _react.default.createElement("div", {
+        }, "votePlace"), _react.default.createElement("hr", null), _react.default.createElement("li", null, "1. Click to select a tile"), _react.default.createElement("li", null, "2. Upload your photo"), _react.default.createElement("li", null, "3. Keep your app running to have your mosaic part show!"), _react.default.createElement("hr", null), _react.default.createElement("div", {
           id: "tile-container"
         }, this.state.tiles.map(function (d, i) {
           return _react.default.createElement("div", {
-            className: !_this6.state.tiles[i] ? "tile" : "tile-clicked",
+            className: !_this3.state.tiles[i] ? "tile" : "tile-clicked",
             key: i
           }, _react.default.createElement("input", {
             type: "file",
-            ref: _this6.onRef,
+            ref: _this3.onRef,
             onChange: function onChange(e) {
-              return _this6.handleClick(e, i);
+              return _this3.handleClick(e, i);
             }
           }));
         })), _react.default.createElement("div", {
           className: "doc-id"
-        }, "Copy to share: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))));
+        }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))));
       } else {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
-        }, "votePlace"), _react.default.createElement("button", {
-          onClick: this.createNewDocument.bind(this)
-        }, "Create new mosaic"), _react.default.createElement(_reactSelect.Creatable, {
-          style: {
-            width: '12em'
-          },
-          placeholder: "if you have the id, paste it here to join an existing doc",
-          onChange: this.selectDocument.bind(this),
-          options: this.state.docs,
-          promptTextCreator: function promptTextCreator(label) {
-            return "Open '".concat(shrinkId(label), "'");
-          }
-        }));
+        }, "votePlace"), "something went wrong....");
       }
 
       return _react.default.createElement("main", {

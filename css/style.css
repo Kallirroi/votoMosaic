@@ -50,6 +50,9 @@ hr {
 
 li {
   list-style: none;
+  /*border: 1px solid;*/
+  width: 30vw;
+  margin: 0 auto;
 }
 
 button {
@@ -104,8 +107,11 @@ button {
   text-align: center;
   color: rgba(0,0,0,0.5);
   margin: 2vh 0;
+  position: relative;
+  display: block;
+  top: 10vh;
 }
 
 .doc-id span {
-  border-bottom: 2px solid #d05141;
+  /*border-bottom: 2px solid #d05141;*/
 }

@@ -13,8 +13,16 @@ hm.once('ready', (hm) => {
   hm.joinSwarm({utp: false}); // getting an error with utp?
 
   let id = hm.swarm.id.toString('hex');
-  console.log(`My ID: ${id}`);
+  console.log(`My peer id is: ${id}`);
+
+  // hm.create();
+  let docsIds = Object.keys(hm.docs).map((docId) => {
+    	return docId;
+  	});
+
+  let docId = docsIds ? docsIds[0] : null;
+  console.log('this docId is ', docId);
 
   let main = document.getElementById('main');
-  render(<App hm={hm} id={id}/>, main);
+  render(<App hm={hm} id={id} docId={docId} />, main);
 });

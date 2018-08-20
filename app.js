@@ -7,8 +7,8 @@ let BrowserWindow = electron.BrowserWindow;
 
 app.on('ready', function () {
   win = new BrowserWindow({
-    minWidth: 800,
-    minHeight: 800,
+    width: 800,
+    height: 900,
     titleBarStyle: 'hidden'
   });
 
