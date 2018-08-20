@@ -40,42 +40,42 @@ class App extends Component {
 
     // handle peer functions
 
-    // this.props.hm.on('peer:message', (actorId, peer, msg) => {
-    //   // keep track of peer ids
-    //   if (msg.type === 'hi') {
-    //     let peerIds = this.state.peerIds;
-    //     let id = peer.remoteId.toString('hex');
-    //     peerIds[id] = msg.id;
-    //   }
-    // });
+    this.props.hm.on('peer:message', (actorId, peer, msg) => {
+      // keep track of peer ids
+      if (msg.type === 'hi') {
+        let peerIds = this.state.peerIds;
+        let id = peer.remoteId.toString('hex');
+        peerIds[id] = msg.id;
+      }
+    });
 
-    // this.props.hm.on('peer:joined', (actorId, peer) => {
-    //   // tell new peers this peer's id
-    //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
-    //   this.setState({ peers: this.uniquePeers(this.state.doc) });
-    //   console.log(this.props.id , 'joined this document')
-    // });
+    this.props.hm.on('peer:joined', (actorId, peer) => {
+      // tell new peers this peer's id
+      this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
+      this.setState({ peers: this.uniquePeers(this.state.doc) });
+      console.log(this.props.id , 'joined this document')
+    });
 
-    // this.props.hm.on('peer:left', (actorId, peer) => {
-    //   if (this.state.doc && peer.remoteId) {
-    //     // remove the leaving peer from the editor
-    //     let id = peer.remoteId.toString('hex');
-    //     id = this.state.peerIds[id];
-    //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-    //       delete changeDoc.peers[id];
-    //       console.log('a peer left')
-    //     });
-    //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-    //   }
-    // });
+    this.props.hm.on('peer:left', (actorId, peer) => {
+      if (this.state.doc && peer.remoteId) {
+        // remove the leaving peer from the editor
+        let id = peer.remoteId.toString('hex');
+        id = this.state.peerIds[id];
+        let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+          delete changeDoc.peers[id];
+          console.log('a peer left')
+        });
+        this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+      }
+    });
 
-    // // remove self when closing window
-    // window.onbeforeunload = () => {
-    //   let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-    //     delete changeDoc.peers[this.props.id];
-    //   });
-    //   console.log('I left the doc')
-    // }
+    // remove self when closing window
+    window.onbeforeunload = () => {
+      let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+        delete changeDoc.peers[this.props.id];
+      });
+      console.log('I left the doc')
+    }
 
   }
 

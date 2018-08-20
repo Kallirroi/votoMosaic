@@ -35288,6 +35288,8 @@ function (_Component) {
   _createClass(App, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      var _this2 = this;
+
       console.log('initialing mosaic');
       var mosaicSize = 392;
 
@@ -35297,39 +35299,53 @@ function (_Component) {
 
       console.log('selecting document with docId', this.props.docId);
       this.selectDocument(this.props.docId); // handle peer functions
-      // this.props.hm.on('peer:message', (actorId, peer, msg) => {
-      //   // keep track of peer ids
-      //   if (msg.type === 'hi') {
-      //     let peerIds = this.state.peerIds;
-      //     let id = peer.remoteId.toString('hex');
-      //     peerIds[id] = msg.id;
-      //   }
-      // });
-      // this.props.hm.on('peer:joined', (actorId, peer) => {
-      //   // tell new peers this peer's id
-      //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
-      //   this.setState({ peers: this.uniquePeers(this.state.doc) });
-      //   console.log(this.props.id , 'joined this document')
-      // });
-      // this.props.hm.on('peer:left', (actorId, peer) => {
-      //   if (this.state.doc && peer.remoteId) {
-      //     // remove the leaving peer from the editor
-      //     let id = peer.remoteId.toString('hex');
-      //     id = this.state.peerIds[id];
-      //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-      //       delete changeDoc.peers[id];
-      //       console.log('a peer left')
-      //     });
-      //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-      //   }
-      // });
-      // // remove self when closing window
-      // window.onbeforeunload = () => {
-      //   let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-      //     delete changeDoc.peers[this.props.id];
-      //   });
-      //   console.log('I left the doc')
-      // }
+
+      this.props.hm.on('peer:message', function (actorId, peer, msg) {
+        // keep track of peer ids
+        if (msg.type === 'hi') {
+          var peerIds = _this2.state.peerIds;
+          var id = peer.remoteId.toString('hex');
+          peerIds[id] = msg.id;
+        }
+      });
+      this.props.hm.on('peer:joined', function (actorId, peer) {
+        // tell new peers this peer's id
+        _this2.props.hm._messagePeer(peer, {
+          type: 'hi',
+          id: _this2.props.id
+        });
+
+        _this2.setState({
+          peers: _this2.uniquePeers(_this2.state.doc)
+        });
+
+        console.log(_this2.props.id, 'joined this document');
+      });
+      this.props.hm.on('peer:left', function (actorId, peer) {
+        if (_this2.state.doc && peer.remoteId) {
+          // remove the leaving peer from the editor
+          var id = peer.remoteId.toString('hex');
+          id = _this2.state.peerIds[id];
+
+          var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
+            delete changeDoc.peers[id];
+            console.log('a peer left');
+          });
+
+          _this2.setState({
+            doc: changedDoc,
+            peers: _this2.uniquePeers(_this2.state.doc)
+          });
+        }
+      }); // remove self when closing window
+
+      window.onbeforeunload = function () {
+        var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
+          delete changeDoc.peers[_this2.props.id];
+        });
+
+        console.log('I left the doc');
+      };
     }
   }, {
     key: "uniquePeers",
@@ -35349,13 +35365,13 @@ function (_Component) {
   }, {
     key: "listenForDocument",
     value: function listenForDocument() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
         console.log('listening for document');
 
-        _this2.setState({
-          peers: _this2.uniquePeers(doc)
+        _this3.setState({
+          peers: _this3.uniquePeers(doc)
         });
       });
     }
@@ -35399,7 +35415,7 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       var main;
 
@@ -35410,13 +35426,13 @@ function (_Component) {
           id: "tile-container"
         }, this.state.tiles.map(function (d, i) {
           return _react.default.createElement("div", {
-            className: !_this3.state.tiles[i] ? "tile" : "tile-clicked",
+            className: !_this4.state.tiles[i] ? "tile" : "tile-clicked",
             key: i
           }, _react.default.createElement("input", {
             type: "file",
-            ref: _this3.onRef,
+            ref: _this4.onRef,
             onChange: function onChange(e) {
-              return _this3.handleClick(e, i);
+              return _this4.handleClick(e, i);
             }
           }));
         })), _react.default.createElement("div", {
