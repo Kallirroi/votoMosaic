@@ -149,6 +149,7 @@ class App extends Component {
               )}
           </div>
           <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
+          <div className='doc-id'>My swarm id: <span>{this.props.id}</span></div>
         </div>
       );
     } else {

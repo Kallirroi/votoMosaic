@@ -35433,7 +35433,9 @@ function (_Component) {
           }));
         })), _react.default.createElement("div", {
           className: "doc-id"
-        }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))));
+        }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
+          className: "doc-id"
+        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)));
       } else {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
