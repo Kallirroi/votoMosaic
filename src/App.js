@@ -43,10 +43,10 @@ class App extends Component {
     this.props.hm.on('peer:message', (actorId, peer, msg) => {
       // keep track of peer ids
       if (msg.type === 'hi') {
-        console.log('the new peer says hi')
         let peerIds = this.state.peerIds;
         let id = peer.remoteId.toString('hex');
         peerIds[id] = msg.id;
+        console.log('we were joined by', peerIds[id])
       }
     });
 
@@ -54,23 +54,26 @@ class App extends Component {
       // tell new peers this peer's id
       this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
       this.setState({ peers: this.uniquePeers(this.state.doc) });
-      console.log('peers in doc: ', this.state.peers.length)
+      console.log('here is my list of peers in this session ',this.state.peers);
     });
 
-    // this.props.hm.on('peer:left', (actorId, peer) => {
-    //   if (this.state.doc && peer.remoteId) {
-    //     // remove the leaving peer from the editor
-    //     let id = peer.remoteId.toString('hex');
-    //     id = this.state.peerIds[id];
-    //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-    //       delete changeDoc.peers[id];
-    //       console.log('a peer left')
-    //     });
-    //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-    //   }
-    // });
+    this.props.hm.on('peer:left', (actorId, peer) => {
+      
+      if (this.state.doc && peer.remoteId) {
+        // remove the leaving peer 
+        let id = peer.remoteId.toString('hex');
+        id = this.state.peerIds[id];
+        console.log(id)
+        let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+          delete changeDoc.peers[id];
+          console.log(changeDoc.peers[id], 'just left')
+        });
+        this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+      }
 
-    // remove self when closing window
+    });
+
+    // remove self
     window.onbeforeunload = () => {
       let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
         delete changeDoc.peers[this.props.id];

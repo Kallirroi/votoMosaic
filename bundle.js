@@ -35303,10 +35303,10 @@ function (_Component) {
       this.props.hm.on('peer:message', function (actorId, peer, msg) {
         // keep track of peer ids
         if (msg.type === 'hi') {
-          console.log('the new peer says hi');
           var peerIds = _this2.state.peerIds;
           var id = peer.remoteId.toString('hex');
           peerIds[id] = msg.id;
+          console.log('we were joined by', peerIds[id]);
         }
       });
       this.props.hm.on('peer:joined', function (actorId, peer) {
@@ -35320,20 +35320,26 @@ function (_Component) {
           peers: _this2.uniquePeers(_this2.state.doc)
         });
 
-        console.log('peers in doc: ', _this2.state.peers.length);
-      }); // this.props.hm.on('peer:left', (actorId, peer) => {
-      //   if (this.state.doc && peer.remoteId) {
-      //     // remove the leaving peer from the editor
-      //     let id = peer.remoteId.toString('hex');
-      //     id = this.state.peerIds[id];
-      //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-      //       delete changeDoc.peers[id];
-      //       console.log('a peer left')
-      //     });
-      //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-      //   }
-      // });
-      // remove self when closing window
+        console.log('here is my list of peers in this session ', _this2.state.peers);
+      });
+      this.props.hm.on('peer:left', function (actorId, peer) {
+        if (_this2.state.doc && peer.remoteId) {
+          // remove the leaving peer 
+          var id = peer.remoteId.toString('hex');
+          id = _this2.state.peerIds[id];
+          console.log(id);
+
+          var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
+            delete changeDoc.peers[id];
+            console.log(changeDoc.peers[id], 'just left');
+          });
+
+          _this2.setState({
+            doc: changedDoc,
+            peers: _this2.uniquePeers(_this2.state.doc)
+          });
+        }
+      }); // remove self
 
       window.onbeforeunload = function () {
         var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
