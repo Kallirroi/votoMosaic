@@ -15,11 +15,8 @@ class App extends Component {
     super(props);
     this.state = {
       doc: this.props.hm.docs[this.props.docId],
-      name: '',
       peers: [],
-      docs: [],
       peerIds: {},
-      lastDiffs: [],
       tiles: []
     };
     this.handleClick = this.handleClick.bind(this);
@@ -54,32 +51,33 @@ class App extends Component {
       // tell new peers this peer's id
       this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
       this.setState({ peers: this.uniquePeers(this.state.doc) });
-      console.log('here is my list of peers in this session ',this.state.peers);
+      console.log('here is my list of peer remote ids in this session ',this.state.peers);
     });
 
-    this.props.hm.on('peer:left', (actorId, peer) => {
-      
-      if (this.state.doc && peer.remoteId) {
-        // remove the leaving peer 
-        let id = peer.remoteId.toString('hex');
-        id = this.state.peerIds[id];
-        console.log(id)
-        let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-          delete changeDoc.peers[id];
-          console.log(changeDoc.peers[id], 'just left')
-        });
-        this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-      }
+    // this.props.hm.on('peer:left', (actorId, peer) => {
+    //   if (this.state.doc && peer.remoteId) {
+    //     // remove the leaving peer 
+    //     let id = peer.remoteId.toString('hex');
+    //     id = this.state.peerIds[id];
 
-    });
+    //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+    //       delete changeDoc.peers[id];
+    //     });
+    //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+    //   }
+    // });
 
     // remove self
     window.onbeforeunload = () => {
-      let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-        delete changeDoc.peers[this.props.id];
-      });
-      console.log('I left the doc')
+      this.state.doc.leave(this.props.id);
     }
+
+    this.props.hm.on('document:updated', (docId, doc, prevDoc) => {
+      if (this.state.doc && this.props.hm.getId(this.state.doc) == docId) {
+        this.setState({ doc});
+      }
+    });
+
 
   }
 
@@ -123,14 +121,16 @@ class App extends Component {
     let updatingTiles = this.state.tiles;
     updatingTiles[tile] = true;
     this.setState({tiles: updatingTiles});
-    console.log('updated tile');
+    console.log('you chose a tile, now no one can click on it!');
 
-    this.loadFile(e);
+    //the hypermerge instance, rather than this app's state, needs to be updated ********
   }
+
+
 
   loadFile(e) {
     let file = e.target.files[0];
-    console.log(file.path, 'ok now what? ');
+    console.log(file.path);
   }
 
   render() {
@@ -147,7 +147,7 @@ class App extends Component {
           <div id="tile-container">
             {this.state.tiles.map( (d,i) => 
               <div className={ !this.state.tiles[i] ? "tile" : "tile-clicked"} key={i}>
-                <input type="file" ref={this.onRef} onChange={e => this.handleClick(e,i)}/>
+                <input type="file" disabled={this.state.tiles[i]} ref={this.onRef} onChange={e => this.handleClick(e,i)}/>
               </div>
               )}
           </div>

@@ -35269,11 +35269,8 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this, props));
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
-      name: '',
       peers: [],
-      docs: [],
       peerIds: {},
-      lastDiffs: [],
       tiles: []
     };
     _this.handleClick = _this.handleClick.bind(_assertThisInitialized(_assertThisInitialized(_this)));
@@ -35320,34 +35317,31 @@ function (_Component) {
           peers: _this2.uniquePeers(_this2.state.doc)
         });
 
-        console.log('here is my list of peers in this session ', _this2.state.peers);
-      });
-      this.props.hm.on('peer:left', function (actorId, peer) {
-        if (_this2.state.doc && peer.remoteId) {
-          // remove the leaving peer 
-          var id = peer.remoteId.toString('hex');
-          id = _this2.state.peerIds[id];
-          console.log(id);
-
-          var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
-            delete changeDoc.peers[id];
-            console.log(changeDoc.peers[id], 'just left');
-          });
-
-          _this2.setState({
-            doc: changedDoc,
-            peers: _this2.uniquePeers(_this2.state.doc)
-          });
-        }
-      }); // remove self
+        console.log('here is my list of peer remote ids in this session ', _this2.state.peers);
+      }); // this.props.hm.on('peer:left', (actorId, peer) => {
+      //   if (this.state.doc && peer.remoteId) {
+      //     // remove the leaving peer 
+      //     let id = peer.remoteId.toString('hex');
+      //     id = this.state.peerIds[id];
+      //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+      //       delete changeDoc.peers[id];
+      //     });
+      //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+      //   }
+      // });
+      // remove self
 
       window.onbeforeunload = function () {
-        var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
-          delete changeDoc.peers[_this2.props.id];
-        });
-
-        console.log('I left the doc');
+        _this2.state.doc.leave(_this2.props.id);
       };
+
+      this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
+        if (_this2.state.doc && _this2.props.hm.getId(_this2.state.doc) == docId) {
+          _this2.setState({
+            doc: doc
+          });
+        }
+      });
     }
   }, {
     key: "uniquePeers",
@@ -35405,14 +35399,13 @@ function (_Component) {
       this.setState({
         tiles: updatingTiles
       });
-      console.log('updated tile');
-      this.loadFile(e);
+      console.log('you chose a tile, now no one can click on it!'); //the hypermerge instance, rather than this app's state, needs to be updated ********
     }
   }, {
     key: "loadFile",
     value: function loadFile(e) {
       var file = e.target.files[0];
-      console.log(file.path, 'ok now what? ');
+      console.log(file.path);
     }
   }, {
     key: "render",
@@ -35432,6 +35425,7 @@ function (_Component) {
             key: i
           }, _react.default.createElement("input", {
             type: "file",
+            disabled: _this4.state.tiles[i],
             ref: _this4.onRef,
             onChange: function onChange(e) {
               return _this4.handleClick(e, i);
