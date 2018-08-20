@@ -35328,7 +35328,7 @@ function (_Component) {
           peers: _this2.uniquePeers(_this2.state.doc)
         });
 
-        console.log('peer joined');
+        console.log('a peer joined');
       });
       this.props.hm.on('peer:left', function (actorId, peer) {
         if (_this2.state.doc && peer.remoteId) {
@@ -35338,14 +35338,13 @@ function (_Component) {
 
           var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
             delete changeDoc.peers[id];
+            console.log('a peer left');
           });
 
           _this2.setState({
             doc: changedDoc,
             peers: _this2.uniquePeers(_this2.state.doc)
           });
-
-          console.log('peer left');
         }
       }); // remove self when closing window
 
@@ -35353,6 +35352,8 @@ function (_Component) {
         var changedDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
           delete changeDoc.peers[_this2.props.id];
         });
+
+        console.log('I left the doc');
       };
 
       this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
@@ -35374,21 +35375,6 @@ function (_Component) {
       this.props.hm.on('document:ready', function (docId, doc, prevDoc) {
         _this2.updateDocsList();
       });
-    }
-  }, {
-    key: "uniquePeers",
-    value: function uniquePeers(doc) {
-      // count unique peers on document
-      if (doc) {
-        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
-        return _toConsumableArray(new Set(peers.filter(function (p) {
-          return p.remoteId;
-        }).map(function (p) {
-          return p.remoteId.toString('hex');
-        })));
-      }
-
-      return [];
     }
   }, {
     key: "listenForDocument",
@@ -35413,18 +35399,21 @@ function (_Component) {
           peers: _this3.uniquePeers(doc)
         });
       });
+      console.log('listened for doc');
     }
   }, {
     key: "createNewDocument",
     value: function createNewDocument() {
       this.props.hm.create();
       this.listenForDocument();
+      console.log('created doc');
     }
   }, {
     key: "selectDocument",
     value: function selectDocument(selected) {
       var docId = selected.value;
       this.openDocument(docId);
+      console.log('selected doc');
     }
   }, {
     key: "openDocument",
@@ -35447,6 +35436,8 @@ function (_Component) {
           this.props.hm.open(docId);
           this.listenForDocument();
         }
+
+        console.log('opened doc');
       } catch (e) {
         console.log(e);
       }
@@ -35467,7 +35458,22 @@ function (_Component) {
       this.setState({
         docs: docs
       });
-      console.log('updated document');
+      console.log('updated doc');
+    }
+  }, {
+    key: "uniquePeers",
+    value: function uniquePeers(doc) {
+      // count unique peers on document
+      if (doc) {
+        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
+        return _toConsumableArray(new Set(peers.filter(function (p) {
+          return p.remoteId;
+        }).map(function (p) {
+          return p.remoteId.toString('hex');
+        })));
+      }
+
+      return [];
     }
   }, {
     key: "render",
@@ -35510,17 +35516,7 @@ function (_Component) {
           promptTextCreator: function promptTextCreator(label) {
             return "Open '".concat(shrinkId(label), "'");
           }
-        }), _react.default.createElement("br", null), _react.default.createElement("br", null), "or if you don't have the id, here's a list of the docs you have created", _react.default.createElement("ul", {
-          id: "doc-list"
-        }, this.state.docs.map(function (d) {
-          return _react.default.createElement("li", {
-            key: d.value
-          }, _react.default.createElement("a", {
-            onClick: function onClick() {
-              return _this6.openDocument(d.value);
-            }
-          }, d.label));
-        })));
+        }));
       }
 
       return _react.default.createElement("main", {

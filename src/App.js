@@ -45,7 +45,6 @@ class App extends Component {
 
   componentDidMount() {
     
-
     //initialize mosaic
     let mosaicSize = 392;
     for (var i = mosaicSize - 1; i >= 0; i--) {
@@ -65,7 +64,7 @@ class App extends Component {
       // tell new peers this peer's id
       this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
       this.setState({ peers: this.uniquePeers(this.state.doc) });
-      console.log('peer joined')
+      console.log('a peer joined')
     });
 
     this.props.hm.on('peer:left', (actorId, peer) => {
@@ -75,9 +74,9 @@ class App extends Component {
         id = this.state.peerIds[id];
         let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
           delete changeDoc.peers[id];
+          console.log('a peer left')
         });
         this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
-        console.log('peer left')
       }
     });
 
@@ -86,6 +85,7 @@ class App extends Component {
       let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
         delete changeDoc.peers[this.props.id];
       });
+      console.log('I left the doc')
     }
 
     this.props.hm.on('document:updated', (docId, doc, prevDoc) => {
@@ -102,16 +102,6 @@ class App extends Component {
     });
   }
 
-  uniquePeers(doc) {
-    // count unique peers on document
-    if (doc) {
-      let peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
-      return [...new Set(peers.filter((p) => p.remoteId).map(p => p.remoteId.toString('hex')))];
-    }
-    return [];
-  }
-
-
   listenForDocument() {
     this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
       let changedDoc = this.props.hm.change(doc, (changeDoc) => {
@@ -126,16 +116,19 @@ class App extends Component {
       });
       this.setState({ doc: changedDoc, peers: this.uniquePeers(doc) });
     });
+    console.log('listened for doc')
   }
 
   createNewDocument() {
     this.props.hm.create();
     this.listenForDocument();
+    console.log('created doc')
   }
 
   selectDocument(selected) {
     let docId = selected.value;
     this.openDocument(docId);
+    console.log('selected doc')
   }
 
   openDocument(docId) {
@@ -152,6 +145,7 @@ class App extends Component {
         this.props.hm.open(docId);
         this.listenForDocument();
       }
+    console.log('opened doc')
     } catch(e) {
       console.log(e);
     }
@@ -162,7 +156,16 @@ class App extends Component {
       return { value: docId, label: this.props.hm.docs[docId].title };
     }).filter((d) => d.label);
     this.setState({ docs });
-    console.log('updated document')
+    console.log('updated doc')
+  }
+
+  uniquePeers(doc) {
+    // count unique peers on document
+    if (doc) {
+      let peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
+      return [...new Set(peers.filter((p) => p.remoteId).map(p => p.remoteId.toString('hex')))];
+    }
+    return [];
   }
 
   render() {
@@ -171,7 +174,6 @@ class App extends Component {
       main = (
         <div> 
           <h1 className="title">votePlace</h1>
-          <hr/>
           <div id="tile-container">
             {this.state.tiles.map( (d,i) => 
               <div className={ !this.state.tiles[i] ? "tile" : "tile-clicked"} key={i}>
@@ -194,14 +196,6 @@ class App extends Component {
             options={this.state.docs}
             promptTextCreator={(label) => `Open '${shrinkId(label)}'`}
           />
-          <br/>
-          <br/>
-          or if you don't have the id, here's a list of the docs you have created
-          <ul id='doc-list'>
-            {this.state.docs.map((d) => {
-              return <li key={d.value}><a onClick={() => this.openDocument(d.value)}>{d.label}</a></li>;
-            })}
-          </ul>
         </div>
       );
     }
