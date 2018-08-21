@@ -35286,24 +35286,10 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
+      console.log('selecting document with docId', this.props.docId);
+      this.selectDocument(this.props.docId);
       this.props.hm.on('document:ready', function (docId, doc) {
-        console.log('selecting document with docId', _this2.props.docId);
-
-        _this2.selectDocument(_this2.props.docId);
-
-        var newDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
-          console.log('initializing mosaic');
-          changeDoc.tiles = [];
-          var mosaicSize = 392;
-
-          for (var i = mosaicSize - 1; i >= 0; i--) {
-            changeDoc.tiles.push(false);
-          }
-        });
-
-        _this2.setState({
-          doc: newDoc
-        });
+        _this2.initializeDocument();
       }); // ----------------------- handle peer actions -----------------------
       // this.props.hm.on('peer:message', (actorId, peer, msg) => {
       //   // keep track of peer ids
@@ -35334,6 +35320,8 @@ function (_Component) {
       // remove self
 
       window.onbeforeunload = function () {
+        console.log('removing myself');
+
         _this2.state.doc.leave(_this2.props.id);
       };
 
@@ -35343,13 +35331,31 @@ function (_Component) {
             doc: doc
           });
         }
+
+        console.log('updated document');
       });
+    }
+  }, {
+    key: "initializeDocument",
+    value: function initializeDocument() {
+      var newDoc = this.props.hm.change(this.state.doc, function (changeDoc) {
+        changeDoc.tiles = [];
+        var mosaicSize = 392;
+
+        for (var i = mosaicSize - 1; i >= 0; i--) {
+          changeDoc.tiles.push(false);
+        }
+      });
+      this.setState({
+        doc: newDoc
+      });
+      console.log('initialized mosaic');
     }
   }, {
     key: "selectDocument",
     value: function selectDocument(selected) {
       var docId = selected.value;
-      console.log('selected doc');
+      console.log('selected document');
       this.openDocument(docId);
     }
   }, {
@@ -35369,16 +35375,12 @@ function (_Component) {
       var _this3 = this;
 
       this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
-        console.log('listening for document');
-
         _this3.setState({
           peers: _this3.uniquePeers(doc)
         });
       });
+      console.log('listened for document');
     }
-  }, {
-    key: "initializeDocument",
-    value: function initializeDocument() {}
   }, {
     key: "uniquePeers",
     value: function uniquePeers(doc) {

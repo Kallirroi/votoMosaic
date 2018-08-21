@@ -24,21 +24,11 @@ class App extends Component {
 
   componentDidMount() {
 
+    console.log('selecting document with docId', this.props.docId)
+    this.selectDocument(this.props.docId);
 
     this.props.hm.on('document:ready', (docId, doc) => {
-
-      console.log('selecting document with docId', this.props.docId)
-      this.selectDocument(this.props.docId);
-
-      let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
-        console.log('initializing mosaic')
-        changeDoc.tiles = [];
-        let mosaicSize = 392;
-        for (var i = mosaicSize - 1; i >= 0; i--) {
-          changeDoc.tiles.push(false);
-        }  
-      });
-      this.setState({ doc: newDoc });
+      this.initializeDocument();
     })
 
 
@@ -76,6 +66,7 @@ class App extends Component {
 
     // remove self
     window.onbeforeunload = () => {
+      console.log('removing myself')
       this.state.doc.leave(this.props.id);
     }
 
@@ -83,13 +74,26 @@ class App extends Component {
       if (this.state.doc && this.props.hm.getId(this.state.doc) == docId) {
         this.setState({ doc});
       }
+      console.log('updated document')
     });
 
   }
 
+  initializeDocument() {
+    let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+      changeDoc.tiles = [];
+      let mosaicSize = 392;
+      for (var i = mosaicSize - 1; i >= 0; i--) {
+        changeDoc.tiles.push(false);
+      }  
+    });
+    this.setState({ doc: newDoc });
+    console.log('initialized mosaic')
+  }
+
   selectDocument(selected) {
     let docId = selected.value;
-    console.log('selected doc')
+    console.log('selected document')
     this.openDocument(docId);
   }
 
@@ -106,13 +110,9 @@ class App extends Component {
 
   listenForDocument() {
     this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
-      console.log('listening for document')
       this.setState({ peers: this.uniquePeers(doc) });
     });
-  }
-
-  initializeDocument() {
-
+    console.log('listened for document')
   }
 
 
