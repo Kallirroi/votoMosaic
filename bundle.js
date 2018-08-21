@@ -35339,7 +35339,7 @@ function (_Component) {
     value: function initializeDocument() {
       var newDoc = this.props.hm.change(this.state.doc, function (changeDoc) {
         changeDoc.tiles = [];
-        var mosaicSize = 392;
+        var mosaicSize = 5;
 
         for (var i = mosaicSize - 1; i >= 0; i--) {
           changeDoc.tiles.push(false);
@@ -35431,7 +35431,6 @@ function (_Component) {
           };
 
           reader.readAsDataURL(file);
-          console.log(this.state.imagePath);
         } else {
           this.setState({
             imagePath: ''
@@ -35448,6 +35447,9 @@ function (_Component) {
 
       var main;
       var tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
+      var uploadImage = {
+        backgroundImage: 'url(' + this.state.imagePath + ')'
+      };
 
       if (this.state.doc) {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
@@ -35457,7 +35459,8 @@ function (_Component) {
         }, tiles.map(function (d, i) {
           return _react.default.createElement("div", {
             className: !tiles[i] ? "tile" : "tile-clicked",
-            key: i
+            key: i,
+            style: tiles[i] ? uploadImage : null
           }, _react.default.createElement("input", {
             type: "file",
             disabled: tiles[i],
@@ -35470,9 +35473,7 @@ function (_Component) {
           className: "doc-id"
         }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
           className: "doc-id"
-        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)), _react.default.createElement("img", {
-          src: this.state.imagePath
-        }));
+        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)));
       } else {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"

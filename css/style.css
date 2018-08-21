@@ -75,21 +75,20 @@ button {
   align-content: flex-start;
 }
 
-.tile {
+.tile, .tile-clicked {
   width: 20px;
   height: 20px;
   margin: 1px;
   align-self: flex-start ;
   border: 1px solid #6c746c;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
 }
 
 .tile-clicked {
-  width: 20px;
-  height: 20px;
-  margin: 1px;
-  align-self: flex-start ;
   border: 1px solid #d05141;
-  background: #d05141;
+  /*background: #d05141;*/
 }
 
 .tile:hover {
@@ -101,6 +100,7 @@ button {
 .tile > input , .tile-clicked > input {
   width: 0px;
 }
+
 
 .doc-id {
   font-size: 0.85em;

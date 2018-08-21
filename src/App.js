@@ -81,7 +81,7 @@ class App extends Component {
   initializeDocument() {
     let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
       changeDoc.tiles = [];
-      let mosaicSize = 392;
+      let mosaicSize = 5;
       for (var i = mosaicSize - 1; i >= 0; i--) {
         changeDoc.tiles.push(false);
       }  
@@ -151,7 +151,6 @@ class App extends Component {
           });
         };
         reader.readAsDataURL(file);
-        console.log(this.state.imagePath);
       }
       else {
         this.setState({imagePath: ''})
@@ -164,6 +163,10 @@ class App extends Component {
   render() {
     let main;
     let tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
+    let uploadImage = {
+      backgroundImage: 'url(' + this.state.imagePath + ')'
+    } 
+
     if (this.state.doc) {
       main = (
         <div> 
@@ -175,14 +178,14 @@ class App extends Component {
           <hr/>
           <div id="tile-container">
             {tiles.map( (d,i) => 
-              <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i}>
+              <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i} style={ tiles[i] ? uploadImage: null}>
                 <input type="file" disabled={tiles[i]} ref={this.onRef} onChange={e => this.claimTile(e,i)}/>
               </div>
               )}
           </div>
           <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
           <div className='doc-id'>My swarm id: <span>{this.props.id}</span></div>
-          <img src={this.state.imagePath} />
+          
         </div>
       );
     } else {
