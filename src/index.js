@@ -15,7 +15,7 @@ hm.once('ready', (hm) => {
   let id = hm.swarm.id.toString('hex');
   console.log(`My peer id is: ${id}`);
 
-  // hm.create();
+  hm.create();
   let docsIds = Object.keys(hm.docs).map((docId) => {
     	return docId;
   	});

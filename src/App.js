@@ -35,12 +35,12 @@ class App extends Component {
       }
     });
 
-    // this.props.hm.on('peer:joined', (actorId, peer) => {
-    //   // tell new peers this peer's id
-    //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
-    //   this.setState({ peers: this.uniquePeers(this.state.doc) });
-    //   console.log('here is my list of peer remote ids in this session ',this.state.peers);
-    // });
+    this.props.hm.on('peer:joined', (actorId, peer) => {
+      // tell new peers this peer's id
+      this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
+      this.setState({ peers: this.uniquePeers(this.state.doc) });
+      // console.log('here is my list of peer remote ids in this session ',this.state.peers);
+    });
 
     // this.props.hm.on('peer:left', (actorId, peer) => {
     //   if (this.state.doc && peer.remoteId) {
@@ -62,9 +62,8 @@ class App extends Component {
     }
 
     this.props.hm.on('document:updated', (docId, doc, prevDoc) => {
-      if (this.state.doc && this.props.hm.getId(this.state.doc) == docId) {
-        this.setState({ doc});
-      }
+      let diff = Automerge.diff(prevDoc, doc);
+      this.setState({ doc, diff });
       console.log('updated document')
     });
 
@@ -126,8 +125,8 @@ class App extends Component {
       });
       this.setState({ doc: newDoc });
       console.log('you successfully claimed tile #', tile)
-
       this.loadFile(e, tile);
+      this.listenForDocument();
     }
     catch(e) {
       console.log(e);

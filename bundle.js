@@ -29564,8 +29564,8 @@ hm.once('ready', function (hm) {
   }); // getting an error with utp?
 
   var id = hm.swarm.id.toString('hex');
-  console.log("My peer id is: ".concat(id)); // hm.create();
-
+  console.log("My peer id is: ".concat(id));
+  hm.create();
   var docsIds = Object.keys(hm.docs).map(function (docId) {
     return docId;
   });
@@ -35291,13 +35291,19 @@ function (_Component) {
           peerIds[id] = msg.id;
           console.log('we were joined by', peerIds[id]);
         }
-      }); // this.props.hm.on('peer:joined', (actorId, peer) => {
-      //   // tell new peers this peer's id
-      //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
-      //   this.setState({ peers: this.uniquePeers(this.state.doc) });
-      //   console.log('here is my list of peer remote ids in this session ',this.state.peers);
-      // });
-      // this.props.hm.on('peer:left', (actorId, peer) => {
+      });
+      this.props.hm.on('peer:joined', function (actorId, peer) {
+        // tell new peers this peer's id
+        _this2.props.hm._messagePeer(peer, {
+          type: 'hi',
+          id: _this2.props.id
+        });
+
+        _this2.setState({
+          peers: _this2.uniquePeers(_this2.state.doc)
+        }); // console.log('here is my list of peer remote ids in this session ',this.state.peers);
+
+      }); // this.props.hm.on('peer:left', (actorId, peer) => {
       //   if (this.state.doc && peer.remoteId) {
       //     // remove the leaving peer 
       //     let id = peer.remoteId.toString('hex');
@@ -35317,11 +35323,12 @@ function (_Component) {
       };
 
       this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
-        if (_this2.state.doc && _this2.props.hm.getId(_this2.state.doc) == docId) {
-          _this2.setState({
-            doc: doc
-          });
-        }
+        var diff = _automerge.default.diff(prevDoc, doc);
+
+        _this2.setState({
+          doc: doc,
+          diff: diff
+        });
 
         console.log('updated document');
       });
@@ -35403,6 +35410,7 @@ function (_Component) {
         });
         console.log('you successfully claimed tile #', tile);
         this.loadFile(e, tile);
+        this.listenForDocument();
       } catch (e) {
         console.log(e);
       }
