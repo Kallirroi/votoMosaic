@@ -29564,8 +29564,8 @@ hm.once('ready', function (hm) {
   }); // getting an error with utp?
 
   var id = hm.swarm.id.toString('hex');
-  console.log("My peer id is: ".concat(id));
-  hm.create();
+  console.log("My peer id is: ".concat(id)); // hm.create();
+
   var docsIds = Object.keys(hm.docs).map(function (docId) {
     return docId;
   });
@@ -35249,13 +35249,6 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-function shrinkId(id) {
-  if (id.length <= 12) return id;
-  var front = id.substring(0, 6);
-  var end = id.substring(id.length - 6);
-  return "".concat(front, "...").concat(end);
-}
-
 var App =
 /*#__PURE__*/
 function (_Component) {
@@ -35289,16 +35282,16 @@ function (_Component) {
       this.initializeDocument();
       console.log('selecting document with docId', this.props.docId);
       this.selectDocument(this.props.docId); // ----------------------- handle peer actions -----------------------
-      // this.props.hm.on('peer:message', (actorId, peer, msg) => {
-      //   // keep track of peer ids
-      //   if (msg.type === 'hi') {
-      //     let peerIds = this.state.peerIds;
-      //     let id = peer.remoteId.toString('hex');
-      //     peerIds[id] = msg.id;
-      //     console.log('we were joined by', peerIds[id])
-      //   }
-      // });
-      // this.props.hm.on('peer:joined', (actorId, peer) => {
+
+      this.props.hm.on('peer:message', function (actorId, peer, msg) {
+        // keep track of peer ids
+        if (msg.type === 'hi') {
+          var peerIds = _this2.state.peerIds;
+          var id = peer.remoteId.toString('hex');
+          peerIds[id] = msg.id;
+          console.log('we were joined by', peerIds[id]);
+        }
+      }); // this.props.hm.on('peer:joined', (actorId, peer) => {
       //   // tell new peers this peer's id
       //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
       //   this.setState({ peers: this.uniquePeers(this.state.doc) });

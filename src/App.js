@@ -3,13 +3,6 @@ import { Creatable } from 'react-select';
 import Automerge from 'automerge';
 
 
-function shrinkId(id) {
-  if (id.length <= 12) return id;
-  let front = id.substring(0, 6);
-  let end = id.substring(id.length - 6);
-  return `${front}...${end}`;
-}
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -32,15 +25,15 @@ class App extends Component {
 
     // ----------------------- handle peer actions -----------------------
 
-    // this.props.hm.on('peer:message', (actorId, peer, msg) => {
-    //   // keep track of peer ids
-    //   if (msg.type === 'hi') {
-    //     let peerIds = this.state.peerIds;
-    //     let id = peer.remoteId.toString('hex');
-    //     peerIds[id] = msg.id;
-    //     console.log('we were joined by', peerIds[id])
-    //   }
-    // });
+    this.props.hm.on('peer:message', (actorId, peer, msg) => {
+      // keep track of peer ids
+      if (msg.type === 'hi') {
+        let peerIds = this.state.peerIds;
+        let id = peer.remoteId.toString('hex');
+        peerIds[id] = msg.id;
+        console.log('we were joined by', peerIds[id])
+      }
+    });
 
     // this.props.hm.on('peer:joined', (actorId, peer) => {
     //   // tell new peers this peer's id
