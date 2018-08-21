@@ -16,8 +16,7 @@ class App extends Component {
     this.state = {
       doc: this.props.hm.docs[this.props.docId],
       peers: [],
-      peerIds: {},
-      imagePath: ''
+      peerIds: {}
     };
     this.claimTile = this.claimTile.bind(this);
     this.onRef = ref => this.tile = ref;
@@ -81,9 +80,11 @@ class App extends Component {
   initializeDocument() {
     let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
       changeDoc.tiles = [];
-      let mosaicSize = 5;
+      changeDoc.imagePaths = [];
+      let mosaicSize = 392;
       for (var i = mosaicSize - 1; i >= 0; i--) {
         changeDoc.tiles.push(false);
+        changeDoc.imagePaths.push('');
       }  
     });
     this.setState({ doc: newDoc });
@@ -133,27 +134,26 @@ class App extends Component {
       this.setState({ doc: newDoc });
       console.log('you successfully claimed tile #', tile)
 
-      this.loadFile(e);
+      this.loadFile(e, tile);
     }
     catch(e) {
       console.log(e);
     }
   }
 
-  loadFile(e) {
+  loadFile(e,tile) {
     try {
       let file = e.target.files[0];
       if (file) {
         let reader = new FileReader();
         reader.onload = () => {
-          this.setState({
-            imagePath: reader.result
+          let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+            changeDoc.imagePaths[tile] = reader.result;
           });
+          this.setState({ doc: newDoc });
+
         };
         reader.readAsDataURL(file);
-      }
-      else {
-        this.setState({imagePath: ''})
       }
     } catch(e) {
       console.log('something went wrong', e)
@@ -163,10 +163,7 @@ class App extends Component {
   render() {
     let main;
     let tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
-    let uploadImage = {
-      backgroundImage: 'url(' + this.state.imagePath + ')'
-    } 
-
+    let imagePaths = this.state.doc.imagePaths ? this.state.doc.imagePaths : [];
     if (this.state.doc) {
       main = (
         <div> 
@@ -178,7 +175,7 @@ class App extends Component {
           <hr/>
           <div id="tile-container">
             {tiles.map( (d,i) => 
-              <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i} style={ tiles[i] ? uploadImage: null}>
+              <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i} style={ tiles[i] ? { backgroundImage: 'url(' + imagePaths[i] + ')'}  : null}>
                 <input type="file" disabled={tiles[i]} ref={this.onRef} onChange={e => this.claimTile(e,i)}/>
               </div>
               )}

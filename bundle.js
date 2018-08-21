@@ -35270,8 +35270,7 @@ function (_Component) {
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
       peers: [],
-      peerIds: {},
-      imagePath: ''
+      peerIds: {}
     };
     _this.claimTile = _this.claimTile.bind(_assertThisInitialized(_assertThisInitialized(_this)));
 
@@ -35339,10 +35338,12 @@ function (_Component) {
     value: function initializeDocument() {
       var newDoc = this.props.hm.change(this.state.doc, function (changeDoc) {
         changeDoc.tiles = [];
-        var mosaicSize = 5;
+        changeDoc.imagePaths = [];
+        var mosaicSize = 392;
 
         for (var i = mosaicSize - 1; i >= 0; i--) {
           changeDoc.tiles.push(false);
+          changeDoc.imagePaths.push('');
         }
       });
       this.setState({
@@ -35408,14 +35409,14 @@ function (_Component) {
           doc: newDoc
         });
         console.log('you successfully claimed tile #', tile);
-        this.loadFile(e);
+        this.loadFile(e, tile);
       } catch (e) {
         console.log(e);
       }
     }
   }, {
     key: "loadFile",
-    value: function loadFile(e) {
+    value: function loadFile(e, tile) {
       var _this4 = this;
 
       try {
@@ -35425,16 +35426,16 @@ function (_Component) {
           var reader = new FileReader();
 
           reader.onload = function () {
+            var newDoc = _this4.props.hm.change(_this4.state.doc, function (changeDoc) {
+              changeDoc.imagePaths[tile] = reader.result;
+            });
+
             _this4.setState({
-              imagePath: reader.result
+              doc: newDoc
             });
           };
 
           reader.readAsDataURL(file);
-        } else {
-          this.setState({
-            imagePath: ''
-          });
         }
       } catch (e) {
         console.log('something went wrong', e);
@@ -35447,9 +35448,7 @@ function (_Component) {
 
       var main;
       var tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
-      var uploadImage = {
-        backgroundImage: 'url(' + this.state.imagePath + ')'
-      };
+      var imagePaths = this.state.doc.imagePaths ? this.state.doc.imagePaths : [];
 
       if (this.state.doc) {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
@@ -35460,7 +35459,9 @@ function (_Component) {
           return _react.default.createElement("div", {
             className: !tiles[i] ? "tile" : "tile-clicked",
             key: i,
-            style: tiles[i] ? uploadImage : null
+            style: tiles[i] ? {
+              backgroundImage: 'url(' + imagePaths[i] + ')'
+            } : null
           }, _react.default.createElement("input", {
             type: "file",
             disabled: tiles[i],

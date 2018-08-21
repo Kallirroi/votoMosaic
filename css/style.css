@@ -87,8 +87,7 @@ button {
 }
 
 .tile-clicked {
-  border: 1px solid #d05141;
-  /*background: #d05141;*/
+  border: none;
 }
 
 .tile:hover {
@@ -106,7 +105,6 @@ button {
   font-size: 0.85em;
   text-align: center;
   color: rgba(0,0,0,0.5);
-  margin: 2vh 0;
   position: relative;
   display: block;
   top: 10vh;
