@@ -16,7 +16,8 @@ class App extends Component {
     this.state = {
       doc: this.props.hm.docs[this.props.docId],
       peers: [],
-      peerIds: {}
+      peerIds: {},
+      imagePath: ''
     };
     this.claimTile = this.claimTile.bind(this);
     this.onRef = ref => this.tile = ref;
@@ -24,12 +25,10 @@ class App extends Component {
 
   componentDidMount() {
 
+    this.initializeDocument();
+    
     console.log('selecting document with docId', this.props.docId)
     this.selectDocument(this.props.docId);
-
-    this.props.hm.on('document:ready', (docId, doc) => {
-      this.initializeDocument();
-    })
 
 
     // ----------------------- handle peer actions -----------------------
@@ -133,6 +132,8 @@ class App extends Component {
       });
       this.setState({ doc: newDoc });
       console.log('you successfully claimed tile #', tile)
+
+      this.loadFile(e);
     }
     catch(e) {
       console.log(e);
@@ -140,8 +141,24 @@ class App extends Component {
   }
 
   loadFile(e) {
-    let file = e.target.files[0];
-    console.log(file.path);
+    try {
+      let file = e.target.files[0];
+      if (file) {
+        let reader = new FileReader();
+        reader.onload = () => {
+          this.setState({
+            imagePath: reader.result
+          });
+        };
+        reader.readAsDataURL(file);
+        console.log(this.state.imagePath);
+      }
+      else {
+        this.setState({imagePath: ''})
+      }
+    } catch(e) {
+      console.log('something went wrong', e)
+    }
   }
 
   render() {
@@ -165,6 +182,7 @@ class App extends Component {
           </div>
           <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
           <div className='doc-id'>My swarm id: <span>{this.props.id}</span></div>
+          <img src={this.state.imagePath} />
         </div>
       );
     } else {

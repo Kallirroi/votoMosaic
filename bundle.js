@@ -29564,8 +29564,8 @@ hm.once('ready', function (hm) {
   }); // getting an error with utp?
 
   var id = hm.swarm.id.toString('hex');
-  console.log("My peer id is: ".concat(id)); // hm.create();
-
+  console.log("My peer id is: ".concat(id));
+  hm.create();
   var docsIds = Object.keys(hm.docs).map(function (docId) {
     return docId;
   });
@@ -35270,7 +35270,8 @@ function (_Component) {
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
       peers: [],
-      peerIds: {}
+      peerIds: {},
+      imagePath: ''
     };
     _this.claimTile = _this.claimTile.bind(_assertThisInitialized(_assertThisInitialized(_this)));
 
@@ -35286,11 +35287,9 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
+      this.initializeDocument();
       console.log('selecting document with docId', this.props.docId);
-      this.selectDocument(this.props.docId);
-      this.props.hm.on('document:ready', function (docId, doc) {
-        _this2.initializeDocument();
-      }); // ----------------------- handle peer actions -----------------------
+      this.selectDocument(this.props.docId); // ----------------------- handle peer actions -----------------------
       // this.props.hm.on('peer:message', (actorId, peer, msg) => {
       //   // keep track of peer ids
       //   if (msg.type === 'hi') {
@@ -35409,6 +35408,7 @@ function (_Component) {
           doc: newDoc
         });
         console.log('you successfully claimed tile #', tile);
+        this.loadFile(e);
       } catch (e) {
         console.log(e);
       }
@@ -35416,13 +35416,35 @@ function (_Component) {
   }, {
     key: "loadFile",
     value: function loadFile(e) {
-      var file = e.target.files[0];
-      console.log(file.path);
+      var _this4 = this;
+
+      try {
+        var file = e.target.files[0];
+
+        if (file) {
+          var reader = new FileReader();
+
+          reader.onload = function () {
+            _this4.setState({
+              imagePath: reader.result
+            });
+          };
+
+          reader.readAsDataURL(file);
+          console.log(this.state.imagePath);
+        } else {
+          this.setState({
+            imagePath: ''
+          });
+        }
+      } catch (e) {
+        console.log('something went wrong', e);
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      var _this4 = this;
+      var _this5 = this;
 
       var main;
       var tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
@@ -35439,16 +35461,18 @@ function (_Component) {
           }, _react.default.createElement("input", {
             type: "file",
             disabled: tiles[i],
-            ref: _this4.onRef,
+            ref: _this5.onRef,
             onChange: function onChange(e) {
-              return _this4.claimTile(e, i);
+              return _this5.claimTile(e, i);
             }
           }));
         })), _react.default.createElement("div", {
           className: "doc-id"
         }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
           className: "doc-id"
-        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)));
+        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)), _react.default.createElement("img", {
+          src: this.state.imagePath
+        }));
       } else {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
