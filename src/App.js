@@ -16,43 +16,50 @@ class App extends Component {
     this.state = {
       doc: this.props.hm.docs[this.props.docId],
       peers: [],
-      peerIds: {},
-      tiles: []
+      peerIds: {}
     };
-    this.handleClick = this.handleClick.bind(this);
+    this.claimTile = this.claimTile.bind(this);
     this.onRef = ref => this.tile = ref;
   }
 
   componentDidMount() {
 
-    console.log('initialing mosaic')
-      let mosaicSize = 392;
-      for (var i = mosaicSize - 1; i >= 0; i--) {
-        this.state.tiles.push(false);
-    }   
 
-    console.log('selecting document with docId', this.props.docId)
-    this.selectDocument(this.props.docId);
+    this.props.hm.on('document:ready', (docId, doc) => {
+
+      console.log('selecting document with docId', this.props.docId)
+      this.selectDocument(this.props.docId);
+
+      let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+        console.log('initializing mosaic')
+        changeDoc.tiles = [];
+        let mosaicSize = 392;
+        for (var i = mosaicSize - 1; i >= 0; i--) {
+          changeDoc.tiles.push(false);
+        }  
+      });
+      this.setState({ doc: newDoc });
+    })
 
 
     // ----------------------- handle peer actions -----------------------
 
-    this.props.hm.on('peer:message', (actorId, peer, msg) => {
-      // keep track of peer ids
-      if (msg.type === 'hi') {
-        let peerIds = this.state.peerIds;
-        let id = peer.remoteId.toString('hex');
-        peerIds[id] = msg.id;
-        console.log('we were joined by', peerIds[id])
-      }
-    });
+    // this.props.hm.on('peer:message', (actorId, peer, msg) => {
+    //   // keep track of peer ids
+    //   if (msg.type === 'hi') {
+    //     let peerIds = this.state.peerIds;
+    //     let id = peer.remoteId.toString('hex');
+    //     peerIds[id] = msg.id;
+    //     console.log('we were joined by', peerIds[id])
+    //   }
+    // });
 
-    this.props.hm.on('peer:joined', (actorId, peer) => {
-      // tell new peers this peer's id
-      this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
-      this.setState({ peers: this.uniquePeers(this.state.doc) });
-      console.log('here is my list of peer remote ids in this session ',this.state.peers);
-    });
+    // this.props.hm.on('peer:joined', (actorId, peer) => {
+    //   // tell new peers this peer's id
+    //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
+    //   this.setState({ peers: this.uniquePeers(this.state.doc) });
+    //   console.log('here is my list of peer remote ids in this session ',this.state.peers);
+    // });
 
     // this.props.hm.on('peer:left', (actorId, peer) => {
     //   if (this.state.doc && peer.remoteId) {
@@ -60,10 +67,10 @@ class App extends Component {
     //     let id = peer.remoteId.toString('hex');
     //     id = this.state.peerIds[id];
 
-    //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+    //     let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
     //       delete changeDoc.peers[id];
     //     });
-    //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+    //     this.setState({ doc: newDoc, peers: this.uniquePeers(this.state.doc) });
     //   }
     // });
 
@@ -78,23 +85,6 @@ class App extends Component {
       }
     });
 
-
-  }
-
-  uniquePeers(doc) {
-    // count unique peers on document
-    if (doc) {
-      let peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
-      return [...new Set(peers.filter((p) => p.remoteId).map(p => p.remoteId.toString('hex')))];
-    }
-    return [];
-  }
-
-  listenForDocument() {
-    this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
-      console.log('listening for document')
-      this.setState({ peers: this.uniquePeers(doc) });
-    });
   }
 
   selectDocument(selected) {
@@ -114,19 +104,40 @@ class App extends Component {
     }
   }
 
-  handleClick(e, tile) {
-    e.preventDefault();
+  listenForDocument() {
+    this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
+      console.log('listening for document')
+      this.setState({ peers: this.uniquePeers(doc) });
+    });
+  }
 
-    //update clicked tile to true
-    let updatingTiles = this.state.tiles;
-    updatingTiles[tile] = true;
-    this.setState({tiles: updatingTiles});
-    console.log('you chose a tile, now no one can click on it!');
+  initializeDocument() {
 
-    //the hypermerge instance, rather than this app's state, needs to be updated ********
   }
 
 
+  uniquePeers(doc) {
+    // count unique peers on document
+    if (doc) {
+      let peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
+      return [...new Set(peers.filter((p) => p.remoteId).map(p => p.remoteId.toString('hex')))];
+    }
+    return [];
+  }
+
+  claimTile(e, tile) {
+    e.preventDefault();
+    try {
+      let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+        changeDoc.tiles[tile] = true;
+      });
+      this.setState({ doc: newDoc });
+      console.log('you successfully claimed tile #', tile)
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
 
   loadFile(e) {
     let file = e.target.files[0];
@@ -135,6 +146,7 @@ class App extends Component {
 
   render() {
     let main;
+    let tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
     if (this.state.doc) {
       main = (
         <div> 
@@ -145,9 +157,9 @@ class App extends Component {
           <li>3. Keep your app running to have your mosaic part show!</li>
           <hr/>
           <div id="tile-container">
-            {this.state.tiles.map( (d,i) => 
-              <div className={ !this.state.tiles[i] ? "tile" : "tile-clicked"} key={i}>
-                <input type="file" disabled={this.state.tiles[i]} ref={this.onRef} onChange={e => this.handleClick(e,i)}/>
+            {tiles.map( (d,i) => 
+              <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i}>
+                <input type="file" disabled={tiles[i]} ref={this.onRef} onChange={e => this.claimTile(e,i)}/>
               </div>
               )}
           </div>

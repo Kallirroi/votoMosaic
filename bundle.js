@@ -35270,10 +35270,9 @@ function (_Component) {
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
       peers: [],
-      peerIds: {},
-      tiles: []
+      peerIds: {}
     };
-    _this.handleClick = _this.handleClick.bind(_assertThisInitialized(_assertThisInitialized(_this)));
+    _this.claimTile = _this.claimTile.bind(_assertThisInitialized(_assertThisInitialized(_this)));
 
     _this.onRef = function (ref) {
       return _this.tile = ref;
@@ -35287,46 +35286,49 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      console.log('initialing mosaic');
-      var mosaicSize = 392;
+      this.props.hm.on('document:ready', function (docId, doc) {
+        console.log('selecting document with docId', _this2.props.docId);
 
-      for (var i = mosaicSize - 1; i >= 0; i--) {
-        this.state.tiles.push(false);
-      }
+        _this2.selectDocument(_this2.props.docId);
 
-      console.log('selecting document with docId', this.props.docId);
-      this.selectDocument(this.props.docId); // ----------------------- handle peer actions -----------------------
+        var newDoc = _this2.props.hm.change(_this2.state.doc, function (changeDoc) {
+          console.log('initializing mosaic');
+          changeDoc.tiles = [];
+          var mosaicSize = 392;
 
-      this.props.hm.on('peer:message', function (actorId, peer, msg) {
-        // keep track of peer ids
-        if (msg.type === 'hi') {
-          var peerIds = _this2.state.peerIds;
-          var id = peer.remoteId.toString('hex');
-          peerIds[id] = msg.id;
-          console.log('we were joined by', peerIds[id]);
-        }
-      });
-      this.props.hm.on('peer:joined', function (actorId, peer) {
-        // tell new peers this peer's id
-        _this2.props.hm._messagePeer(peer, {
-          type: 'hi',
-          id: _this2.props.id
+          for (var i = mosaicSize - 1; i >= 0; i--) {
+            changeDoc.tiles.push(false);
+          }
         });
 
         _this2.setState({
-          peers: _this2.uniquePeers(_this2.state.doc)
+          doc: newDoc
         });
-
-        console.log('here is my list of peer remote ids in this session ', _this2.state.peers);
-      }); // this.props.hm.on('peer:left', (actorId, peer) => {
+      }); // ----------------------- handle peer actions -----------------------
+      // this.props.hm.on('peer:message', (actorId, peer, msg) => {
+      //   // keep track of peer ids
+      //   if (msg.type === 'hi') {
+      //     let peerIds = this.state.peerIds;
+      //     let id = peer.remoteId.toString('hex');
+      //     peerIds[id] = msg.id;
+      //     console.log('we were joined by', peerIds[id])
+      //   }
+      // });
+      // this.props.hm.on('peer:joined', (actorId, peer) => {
+      //   // tell new peers this peer's id
+      //   this.props.hm._messagePeer(peer, {type: 'hi', id: this.props.id});
+      //   this.setState({ peers: this.uniquePeers(this.state.doc) });
+      //   console.log('here is my list of peer remote ids in this session ',this.state.peers);
+      // });
+      // this.props.hm.on('peer:left', (actorId, peer) => {
       //   if (this.state.doc && peer.remoteId) {
       //     // remove the leaving peer 
       //     let id = peer.remoteId.toString('hex');
       //     id = this.state.peerIds[id];
-      //     let changedDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
+      //     let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
       //       delete changeDoc.peers[id];
       //     });
-      //     this.setState({ doc: changedDoc, peers: this.uniquePeers(this.state.doc) });
+      //     this.setState({ doc: newDoc, peers: this.uniquePeers(this.state.doc) });
       //   }
       // });
       // remove self
@@ -35341,34 +35343,6 @@ function (_Component) {
             doc: doc
           });
         }
-      });
-    }
-  }, {
-    key: "uniquePeers",
-    value: function uniquePeers(doc) {
-      // count unique peers on document
-      if (doc) {
-        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
-        return _toConsumableArray(new Set(peers.filter(function (p) {
-          return p.remoteId;
-        }).map(function (p) {
-          return p.remoteId.toString('hex');
-        })));
-      }
-
-      return [];
-    }
-  }, {
-    key: "listenForDocument",
-    value: function listenForDocument() {
-      var _this3 = this;
-
-      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
-        console.log('listening for document');
-
-        _this3.setState({
-          peers: _this3.uniquePeers(doc)
-        });
       });
     }
   }, {
@@ -35390,16 +35364,52 @@ function (_Component) {
       }
     }
   }, {
-    key: "handleClick",
-    value: function handleClick(e, tile) {
-      e.preventDefault(); //update clicked tile to true
+    key: "listenForDocument",
+    value: function listenForDocument() {
+      var _this3 = this;
 
-      var updatingTiles = this.state.tiles;
-      updatingTiles[tile] = true;
-      this.setState({
-        tiles: updatingTiles
+      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
+        console.log('listening for document');
+
+        _this3.setState({
+          peers: _this3.uniquePeers(doc)
+        });
       });
-      console.log('you chose a tile, now no one can click on it!'); //the hypermerge instance, rather than this app's state, needs to be updated ********
+    }
+  }, {
+    key: "initializeDocument",
+    value: function initializeDocument() {}
+  }, {
+    key: "uniquePeers",
+    value: function uniquePeers(doc) {
+      // count unique peers on document
+      if (doc) {
+        var peers = this.props.hm.feeds[this.props.hm.getId(doc)].peers;
+        return _toConsumableArray(new Set(peers.filter(function (p) {
+          return p.remoteId;
+        }).map(function (p) {
+          return p.remoteId.toString('hex');
+        })));
+      }
+
+      return [];
+    }
+  }, {
+    key: "claimTile",
+    value: function claimTile(e, tile) {
+      e.preventDefault();
+
+      try {
+        var newDoc = this.props.hm.change(this.state.doc, function (changeDoc) {
+          changeDoc.tiles[tile] = true;
+        });
+        this.setState({
+          doc: newDoc
+        });
+        console.log('you successfully claimed tile #', tile);
+      } catch (e) {
+        console.log(e);
+      }
     }
   }, {
     key: "loadFile",
@@ -35413,22 +35423,23 @@ function (_Component) {
       var _this4 = this;
 
       var main;
+      var tiles = this.state.doc.tiles ? this.state.doc.tiles : [];
 
       if (this.state.doc) {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
         }, "votePlace"), _react.default.createElement("hr", null), _react.default.createElement("li", null, "1. Click to select a tile"), _react.default.createElement("li", null, "2. Upload your photo"), _react.default.createElement("li", null, "3. Keep your app running to have your mosaic part show!"), _react.default.createElement("hr", null), _react.default.createElement("div", {
           id: "tile-container"
-        }, this.state.tiles.map(function (d, i) {
+        }, tiles.map(function (d, i) {
           return _react.default.createElement("div", {
-            className: !_this4.state.tiles[i] ? "tile" : "tile-clicked",
+            className: !tiles[i] ? "tile" : "tile-clicked",
             key: i
           }, _react.default.createElement("input", {
             type: "file",
-            disabled: _this4.state.tiles[i],
+            disabled: tiles[i],
             ref: _this4.onRef,
             onChange: function onChange(e) {
-              return _this4.handleClick(e, i);
+              return _this4.claimTile(e, i);
             }
           }));
         })), _react.default.createElement("div", {
