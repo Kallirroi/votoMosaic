@@ -35217,7 +35217,7 @@ var _react = _interopRequireWildcard(__webpack_require__(24));
 
 var _reactSelect = __webpack_require__(515);
 
-var _automerge = _interopRequireDefault(__webpack_require__(165));
+var _automerge = _interopRequireWildcard(__webpack_require__(165));
 
 var _Mosaic = _interopRequireDefault(__webpack_require__(555));
 
@@ -35265,8 +35265,7 @@ function (_Component) {
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
       peers: [],
-      peerIds: {},
-      lastDiffs: []
+      peerIds: {}
     };
     _this.claimTile = _this.claimTile.bind(_assertThisInitialized(_assertThisInitialized(_this)));
 
@@ -35327,13 +35326,6 @@ function (_Component) {
 
       this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
         console.log('UPDATE');
-
-        var lastDiffs = _automerge.default.diff(prevDoc, doc);
-
-        _this2.setState({
-          doc: doc,
-          lastDiffs: lastDiffs
-        });
       });
       this.props.hm.on('document:ready', function (docId, doc, prevDoc) {
         console.log('document is ready');
@@ -35358,10 +35350,16 @@ function (_Component) {
       console.log('initialized mosaic');
     }
   }, {
-    key: "createNewDocument",
-    value: function createNewDocument() {
-      this.props.hm.create();
-      this.listenForDocument();
+    key: "testUpdate",
+    value: function testUpdate() {
+      var newDoc = _automerge.default.change(this.state.doc, function (changeDoc) {
+        // make arbitrary change to the document
+        changeDoc.tiles[0] = true;
+      });
+
+      var changes = _automerge.default.getChanges(this.state.doc, newDoc);
+
+      _automerge.default.applyChanges(this.state.doc, changes);
     }
   }, {
     key: "listenForDocument",
@@ -35470,7 +35468,9 @@ function (_Component) {
           className: "title"
         }, "votePlace"), _react.default.createElement("h2", {
           className: "subtitle"
-        }, "Own your vote, own your data"), _react.default.createElement("hr", null), _react.default.createElement("div", {
+        }, "Own your vote, own your data"), _react.default.createElement("hr", null), _react.default.createElement("button", {
+          onClick: this.testUpdate.bind(this)
+        }, "Test update"), _react.default.createElement("div", {
           className: "explanation"
         }, "VotePlace is a collaborative social experiment, inspired by Reddit's ", _react.default.createElement("i", null, "r/Place"), ". It\u2019s a multi-user collaborative, p2p photo mosaic editor, that runs 100% on the computers of its users. It is serverless, which means that the photos uploaded by the users are not centralized in a repository, but rather exist locally, in each user's computer. The steps are simple, and outlined below: "), _react.default.createElement("ul", null, _react.default.createElement("li", null, "Click on a tile to select it."), _react.default.createElement("li", null, "Upload your photo."), _react.default.createElement("li", null, "Keep the app running to have your photo show!")), _react.default.createElement("div", {
           className: "explanation"
@@ -35491,9 +35491,7 @@ function (_Component) {
               return _this5.claimTile(e, i);
             }
           }));
-        })), _react.default.createElement("button", {
-          onClick: this.createNewDocument.bind(this)
-        }, "Create new document"), _react.default.createElement("div", {
+        })), _react.default.createElement("div", {
           className: "doc-id"
         }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
           className: "doc-id"

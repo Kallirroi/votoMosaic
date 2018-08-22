@@ -103,7 +103,7 @@ button {
 }
 
 .tile-clicked {
-  border: none;
+  border: 1px solid red;
 }
 
 .tile:hover {
@@ -123,7 +123,7 @@ button {
   color: rgba(0,0,0,0.5);
   position: relative;
   display: block;
-  top: 10vh;
+  top: 5vh;
 }
 
 .doc-id span {
