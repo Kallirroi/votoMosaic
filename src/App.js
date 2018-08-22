@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { Creatable } from 'react-select';
 import Automerge from 'automerge';
+import Mosaic from './Mosaic';
 
 
 class App extends Component {
@@ -9,7 +10,8 @@ class App extends Component {
     this.state = {
       doc: this.props.hm.docs[this.props.docId],
       peers: [],
-      peerIds: {}
+      peerIds: {}, 
+      lastDiffs: []
     };
     this.claimTile = this.claimTile.bind(this);
     this.onRef = ref => this.tile = ref;
@@ -62,9 +64,13 @@ class App extends Component {
     }
 
     this.props.hm.on('document:updated', (docId, doc, prevDoc) => {
-      let diff = Automerge.diff(prevDoc, doc);
-      this.setState({ doc, diff });
-      console.log('updated document')
+      console.log('UPDATE')
+      let lastDiffs = Automerge.diff(prevDoc, doc);
+      this.setState({ doc, lastDiffs });
+    });
+
+    this.props.hm.on('document:ready', (docId, doc, prevDoc) => {
+      console.log('document is ready');
     });
 
   }
@@ -81,6 +87,13 @@ class App extends Component {
     });
     this.setState({ doc: newDoc });
     console.log('initialized mosaic')
+  }
+
+  listenForDocument() {
+    this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
+      this.setState({ doc: doc, peers: this.uniquePeers(doc) });
+    });
+    console.log('listened for document');
   }
 
   selectDocument(selected) {
@@ -100,14 +113,6 @@ class App extends Component {
     }
   }
 
-  listenForDocument() {
-    this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
-      this.setState({ peers: this.uniquePeers(doc) });
-    });
-    console.log('listened for document')
-  }
-
-
   uniquePeers(doc) {
     // count unique peers on document
     if (doc) {
@@ -124,9 +129,8 @@ class App extends Component {
         changeDoc.tiles[tile] = true;
       });
       this.setState({ doc: newDoc });
-      console.log('you successfully claimed tile #', tile)
+      console.log('you successfully claimed tile #', tile);
       this.loadFile(e, tile);
-      this.listenForDocument();
     }
     catch(e) {
       console.log(e);
@@ -143,7 +147,7 @@ class App extends Component {
             changeDoc.imagePaths[tile] = reader.result;
           });
           this.setState({ doc: newDoc });
-
+          console.log('file was loaded');
         };
         reader.readAsDataURL(file);
       }
@@ -160,11 +164,22 @@ class App extends Component {
       main = (
         <div> 
           <h1 className="title">votePlace</h1>
+          <h2 className="subtitle">Own your vote, own your data</h2>
           <hr/>
-          <li>1. Click to select a tile</li>
-          <li>2. Upload your photo</li>
-          <li>3. Keep your app running to have your mosaic part show!</li>
+
+          <div className="explanation">VotePlace is a collaborative social experiment, inspired by Reddit's <i>r/Place</i>. It’s a multi-user collaborative, p2p photo mosaic editor, that runs 100% on the computers of its users. It is serverless, which means that the photos uploaded by the users are not centralized in a repository, but rather exist locally, in each user's computer. The steps are simple, and outlined below: </div>
+
+          <ul>
+            <li>Click on a tile to select it.</li>
+            <li>Upload your photo.</li>
+            <li>Keep the app running to have your photo show!</li>
+          </ul>
+          <div className="explanation">
+          VotePlace is built on Electron and in its core uses dat, a p2p protocol. More specifically, it uses hypermerge, a library built on two key dat components, hypercore and swarm-discovery.
+          </div>
+
           <hr/>
+          
           <div id="tile-container">
             {tiles.map( (d,i) => 
               <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i} style={ tiles[i] ? { backgroundImage: 'url(' + imagePaths[i] + ')'}  : null}>
@@ -172,9 +187,10 @@ class App extends Component {
               </div>
               )}
           </div>
-          <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
-          <div className='doc-id'>My swarm id: <span>{this.props.id}</span></div>
           
+          <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
+          <div className='doc-id'>My peer id: <span>{this.props.id}</span></div>
+
         </div>
       );
     } else {

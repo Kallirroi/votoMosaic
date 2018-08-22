@@ -35219,6 +35219,8 @@ var _reactSelect = __webpack_require__(515);
 
 var _automerge = _interopRequireDefault(__webpack_require__(165));
 
+var _Mosaic = _interopRequireDefault(__webpack_require__(555));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
@@ -35263,7 +35265,8 @@ function (_Component) {
     _this.state = {
       doc: _this.props.hm.docs[_this.props.docId],
       peers: [],
-      peerIds: {}
+      peerIds: {},
+      lastDiffs: []
     };
     _this.claimTile = _this.claimTile.bind(_assertThisInitialized(_assertThisInitialized(_this)));
 
@@ -35323,14 +35326,17 @@ function (_Component) {
       };
 
       this.props.hm.on('document:updated', function (docId, doc, prevDoc) {
-        var diff = _automerge.default.diff(prevDoc, doc);
+        console.log('UPDATE');
+
+        var lastDiffs = _automerge.default.diff(prevDoc, doc);
 
         _this2.setState({
           doc: doc,
-          diff: diff
+          lastDiffs: lastDiffs
         });
-
-        console.log('updated document');
+      });
+      this.props.hm.on('document:ready', function (docId, doc, prevDoc) {
+        console.log('document is ready');
       });
     }
   }, {
@@ -35352,6 +35358,19 @@ function (_Component) {
       console.log('initialized mosaic');
     }
   }, {
+    key: "listenForDocument",
+    value: function listenForDocument() {
+      var _this3 = this;
+
+      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
+        _this3.setState({
+          doc: doc,
+          peers: _this3.uniquePeers(doc)
+        });
+      });
+      console.log('listened for document');
+    }
+  }, {
     key: "selectDocument",
     value: function selectDocument(selected) {
       var docId = selected.value;
@@ -35368,18 +35387,6 @@ function (_Component) {
       } catch (e) {
         console.log('something went wrong with opening the document', e);
       }
-    }
-  }, {
-    key: "listenForDocument",
-    value: function listenForDocument() {
-      var _this3 = this;
-
-      this.props.hm.once('document:ready', function (docId, doc, prevDoc) {
-        _this3.setState({
-          peers: _this3.uniquePeers(doc)
-        });
-      });
-      console.log('listened for document');
     }
   }, {
     key: "uniquePeers",
@@ -35410,7 +35417,6 @@ function (_Component) {
         });
         console.log('you successfully claimed tile #', tile);
         this.loadFile(e, tile);
-        this.listenForDocument();
       } catch (e) {
         console.log(e);
       }
@@ -35434,6 +35440,8 @@ function (_Component) {
             _this4.setState({
               doc: newDoc
             });
+
+            console.log('file was loaded');
           };
 
           reader.readAsDataURL(file);
@@ -35454,7 +35462,13 @@ function (_Component) {
       if (this.state.doc) {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
-        }, "votePlace"), _react.default.createElement("hr", null), _react.default.createElement("li", null, "1. Click to select a tile"), _react.default.createElement("li", null, "2. Upload your photo"), _react.default.createElement("li", null, "3. Keep your app running to have your mosaic part show!"), _react.default.createElement("hr", null), _react.default.createElement("div", {
+        }, "votePlace"), _react.default.createElement("h2", {
+          className: "subtitle"
+        }, "Own your vote, own your data"), _react.default.createElement("hr", null), _react.default.createElement("div", {
+          className: "explanation"
+        }, "VotePlace is a collaborative social experiment, inspired by Reddit's ", _react.default.createElement("i", null, "r/Place"), ". It\u2019s a multi-user collaborative, p2p photo mosaic editor, that runs 100% on the computers of its users. It is serverless, which means that the photos uploaded by the users are not centralized in a repository, but rather exist locally, in each user's computer. The steps are simple, and outlined below: "), _react.default.createElement("ul", null, _react.default.createElement("li", null, "Click on a tile to select it."), _react.default.createElement("li", null, "Upload your photo."), _react.default.createElement("li", null, "Keep the app running to have your photo show!")), _react.default.createElement("div", {
+          className: "explanation"
+        }, "VotePlace is built on Electron and in its core uses dat, a p2p protocol. More specifically, it uses hypermerge, a library built on two key dat components, hypercore and swarm-discovery."), _react.default.createElement("hr", null), _react.default.createElement("div", {
           id: "tile-container"
         }, tiles.map(function (d, i) {
           return _react.default.createElement("div", {
@@ -35475,7 +35489,7 @@ function (_Component) {
           className: "doc-id"
         }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
           className: "doc-id"
-        }, "My swarm id: ", _react.default.createElement("span", null, this.props.id)));
+        }, "My peer id: ", _react.default.createElement("span", null, this.props.id)));
       } else {
         main = _react.default.createElement("div", null, _react.default.createElement("h1", {
           className: "title"
@@ -78022,6 +78036,96 @@ module.exports = require("timers");
 __webpack_require__(212);
 module.exports = __webpack_require__(213);
 
+
+/***/ }),
+/* 555 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _automerge = _interopRequireDefault(__webpack_require__(165));
+
+var _react = _interopRequireWildcard(__webpack_require__(24));
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var Peer =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(Peer, _Component);
+
+  function Peer() {
+    _classCallCheck(this, Peer);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Peer).apply(this, arguments));
+  }
+
+  _createClass(Peer, [{
+    key: "render",
+    value: function render() {
+      var peer = this.props.peer;
+      return _react.default.createElement("div", null, "I am a ", peer);
+    }
+  }]);
+
+  return Peer;
+}(_react.Component);
+
+var Mosaic =
+/*#__PURE__*/
+function (_Component2) {
+  _inherits(Mosaic, _Component2);
+
+  function Mosaic(props) {
+    var _this;
+
+    _classCallCheck(this, Mosaic);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(Mosaic).call(this, props));
+    _this.state = {};
+    return _this;
+  }
+
+  _createClass(Mosaic, [{
+    key: "render",
+    value: function render() {
+      var main = _react.default.createElement("div", null, _react.default.createElement(Peer, null));
+
+      return _react.default.createElement("div", null, main);
+    }
+  }]);
+
+  return Mosaic;
+}(_react.Component);
+
+var _default = Mosaic;
+exports.default = _default;
 
 /***/ })
 /******/ ]);

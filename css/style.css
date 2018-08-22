@@ -39,19 +39,35 @@ h1.title {
   text-align: center;
 }
 
+h2.subtitle {
+  font-weight: 500;
+  margin: 0;
+  color: #6c746c;
+  text-align: center;
+}
+
 hr {
-  opacity: 0.2;
+  opacity: 0.1;
   border-color: ##282828;
-  width: 30vw;
+  width: 10vw;
   text-align: center;
   margin: 2vh auto;
 }
 
+.explanation {
+  max-width: 720px;
+  margin: 1vh 0;
+}
+
+ul {
+  border-left: 1px solid;
+  padding-right: 0.5vw;
+}
 
 li {
   list-style: none;
   /*border: 1px solid;*/
-  width: 30vw;
+  max-width: 720px;
   margin: 0 auto;
 }
 
