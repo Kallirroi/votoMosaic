@@ -75,6 +75,7 @@ class App extends Component {
 
   }
 
+
   initializeDocument() {
     let newDoc = this.props.hm.change(this.state.doc, (changeDoc) => {
       changeDoc.tiles = [];
@@ -88,6 +89,12 @@ class App extends Component {
     this.setState({ doc: newDoc });
     console.log('initialized mosaic')
   }
+
+  createNewDocument() {
+    this.props.hm.create();
+    this.listenForDocument();
+  }
+
 
   listenForDocument() {
     this.props.hm.once('document:ready', (docId, doc, prevDoc) => {
@@ -179,7 +186,7 @@ class App extends Component {
           </div>
 
           <hr/>
-          
+
           <div id="tile-container">
             {tiles.map( (d,i) => 
               <div className={ !tiles[i] ? "tile" : "tile-clicked"} key={i} style={ tiles[i] ? { backgroundImage: 'url(' + imagePaths[i] + ')'}  : null}>
@@ -188,6 +195,8 @@ class App extends Component {
               )}
           </div>
           
+          <button onClick={this.createNewDocument.bind(this)}>Create new document</button>
+
           <div className='doc-id'>Document id: <span>{this.props.hm.getId(this.state.doc)}</span></div>
           <div className='doc-id'>My peer id: <span>{this.props.id}</span></div>
 

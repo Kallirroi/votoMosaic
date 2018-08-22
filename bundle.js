@@ -35358,6 +35358,12 @@ function (_Component) {
       console.log('initialized mosaic');
     }
   }, {
+    key: "createNewDocument",
+    value: function createNewDocument() {
+      this.props.hm.create();
+      this.listenForDocument();
+    }
+  }, {
     key: "listenForDocument",
     value: function listenForDocument() {
       var _this3 = this;
@@ -35485,7 +35491,9 @@ function (_Component) {
               return _this5.claimTile(e, i);
             }
           }));
-        })), _react.default.createElement("div", {
+        })), _react.default.createElement("button", {
+          onClick: this.createNewDocument.bind(this)
+        }, "Create new document"), _react.default.createElement("div", {
           className: "doc-id"
         }, "Document id: ", _react.default.createElement("span", null, this.props.hm.getId(this.state.doc))), _react.default.createElement("div", {
           className: "doc-id"
