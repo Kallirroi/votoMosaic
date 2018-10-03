@@ -5,12 +5,12 @@ from multiprocessing import Process, Queue, cpu_count
 
 # Change these 3 config parameters to suit your needs...
 TILE_SIZE      = 50		# height/width of mosaic tiles in pixels
-TILE_MATCH_RES = 5		# tile matching resolution (higher values give better fit but require more processing)
-ENLARGEMENT    = 8		# the mosaic image will be this many times wider and taller than the original
+TILE_MATCH_RES = 4		# tile matching resolution (higher values give better fit but require more processing)
+ENLARGEMENT    = 6		# the mosaic image will be this many times wider and taller than the original
 
 TILE_BLOCK_SIZE = TILE_SIZE / max(min(TILE_MATCH_RES, TILE_SIZE), 1)
 WORKER_COUNT = max(cpu_count() - 1, 1)
-OUT_FILE = 'mosaic.jpeg'
+OUT_FILE = 'output/mosaic.jpeg'
 EOQ_VALUE = None
 
 class TileProcessor:
@@ -49,7 +49,7 @@ class TileProcessor:
 				if large_tile:
 					large_tiles.append(large_tile)
 					small_tiles.append(small_tile)
-		
+
 		print 'Processed %s tiles.' % (len(large_tiles),)
 
 		return (large_tiles, small_tiles)
@@ -66,7 +66,7 @@ class TargetImage:
 		large_img = img.resize((w, h), Image.ANTIALIAS)
 		w_diff = (w % TILE_SIZE)/2
 		h_diff = (h % TILE_SIZE)/2
-		
+
 		# if necesary, crop the image slightly so we use a whole number of tiles horizontally and vertically
 		if w_diff or h_diff:
 			large_img = large_img.crop((w_diff, h_diff, w - w_diff, h - h_diff))
@@ -182,7 +182,7 @@ def compose(original_img, tiles):
 	all_tile_data_large = map(lambda tile : list(tile.getdata()), tiles_large)
 	all_tile_data_small = map(lambda tile : list(tile.getdata()), tiles_small)
 
-	work_queue   = Queue(WORKER_COUNT)	
+	work_queue   = Queue(WORKER_COUNT)
 	result_queue = Queue()
 
 	try:
