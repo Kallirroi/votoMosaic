@@ -34,3 +34,34 @@ canvas {
   z-index: 1;
   margin: 20px;
 }
+
+.form {
+  position: absolute;
+  width: auto;
+  top: 90vh;
+  left: 30vw;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 5px;
+  border-radius: 2px;
+}
+
+.form > input {
+  margin: 0 5px;
+  width: 200px;
+  border: none;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+input#add-photo {
+  width: 200px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.logos {
+  position: absolute;
+  top: 90vh;
+  left: 90vw;
+  z-index: 1;
+}

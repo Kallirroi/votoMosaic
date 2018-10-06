@@ -1,14 +1,31 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" href="style.css">
+
 <body>
   <div class="title">
     your vote counts
   </div>
+
   <div class="subtitle">
     Are you voting this midterm election? Upload an image to this collaborative photomosaic and help remind everyone that their vote matters.
   </div>
+
+  <div class="form">
+    <input placeholder="your name" type="text" maxlength="300" id="name"/>
+    <input placeholder="your email" type="text" maxlength="300" id="email"/>
+    <input type="file" name="image" accept="image/*" id="add-photo">
+  </div>
+
+  <div class="logos">
+    <img src="https://resize.pubpub.org/fit-in/0x200/c7cfyyz6/31507218538557.png" alt="viral-communications" width="90%">
+  </div>
+
   <canvas width="1500" height="800"></canvas>
+
 </body>
+
+
 <script src="https://d3js.org/d3.v4.min.js"></script>
-<script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="module" src="script.js"></script>
