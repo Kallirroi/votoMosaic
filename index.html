@@ -1,34 +1,14 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<canvas width="1600" height="800"></canvas>
+<link rel="stylesheet" href="style.css">
+<body>
+  <div class="title">
+    your vote counts
+  </div>
+  <div class="subtitle">
+    Are you voting this midterm election? Upload an image to this collaborative photomosaic and help remind everyone that their vote matters.
+  </div>
+  <canvas width="1500" height="800"></canvas>
+</body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
-<script>
-
-var canvas = d3.select("canvas").call(d3.zoom().scaleExtent([1, 4]).on("zoom", zoom)),
-    context = canvas.node().getContext("2d"),
-    width = canvas.property("width"),
-    height = canvas.property("height");
-
-
-var imageObj = new Image();
-imageObj.src = "output/Eggleston.jpeg";
-
-canvas.node().getContext("2d");
-context.drawImage(imageObj, 0, 0);
-
-function zoom() {
-  var transform = d3.event.transform;
-  context.save();
-  context.clearRect(0, 0, width, height);
-  context.translate(transform.x, transform.y);
-  context.scale(transform.k, transform.k);
-  draw();
-  context.restore();
-}
-
-function draw() {
-  canvas.node().getContext("2d");
-  context.drawImage(imageObj, 0, 0);
-}
-
-</script>
+<script src="script.js"></script>

@@ -1,19 +1,36 @@
 body {
   position: relative;
+  overflow: hidden;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
 }
 
 svg,
 canvas {
     position: absolute;
+    margin: 0;
+    padding: 0;
 }
 
-.axis text {
-    font: 10px sans-serif;
+
+.title {
+  font-family: 'Vollkorn', sans-serif;
+  font-size: 180px;
+  font-weight: 600;
+  width: 60vw;
+  position: absolute;
+  z-index: 1;
+  margin: 20px;
 }
 
-.axis path,
-.axis line {
-    fill: none;
-    stroke: none;
-    shape-rendering: crispEdges;
+.subtitle {
+  font-family: 'Vollkorn', sans-serif;
+  font-size: 50px;
+  font-weight: 400;
+  width: 60vw;
+  position: absolute;
+  top: 50vh;
+  z-index: 1;
+  margin: 20px;
 }
