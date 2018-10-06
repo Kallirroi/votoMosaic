@@ -1,0 +1,19 @@
+body {
+  position: relative;
+}
+
+svg,
+canvas {
+    position: absolute;
+}
+
+.axis text {
+    font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: none;
+    shape-rendering: crispEdges;
+}
