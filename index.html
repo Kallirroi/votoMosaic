@@ -11,11 +11,10 @@
     Are you voting this midterm election? Upload an image to this collaborative photomosaic and help remind everyone that their vote matters.
   </div>
 
-  <!-- https://script.google.com/macros/s/AKfycbzMi5e-JvqNAQc78M06Iw1E2Gy1jzGl4A7OQXfRZuxpa01Vmxxa/exec -->
-  <form name="submit-to-google-sheet" class="form">
+  <form name="form" class="form" method="POST" netlify>
     <input name="name" placeholder="your name" type="text" maxlength="300" id="name"/>
     <input name="email" placeholder="your email" type="text" maxlength="300" id="email"/>
-    <input type="file" name="image" accept="image/*" id="add-photo">
+    <input name="image" type="file" accept="image/*" id="add-photo">
     <button type="submit" id="submit-form"> Submit </button>
   </form>
 
@@ -30,30 +29,4 @@
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="jquery.serialize-object.min.js"></script>
-<script>
-  var $form = $('form'),
-    url = 'https://script.google.com/macros/s/AKfycbzMi5e-JvqNAQc78M06Iw1E2Gy1jzGl4A7OQXfRZuxpa01Vmxxa/exec'
-
-$('#submit-form').on('click', function(e) {
-  e.preventDefault();
-  var jqxhr = $.ajax({
-    url: url,
-    method: "GET",
-    mode: "cors",
-    dataType: "json",
-    data: $form.serializeObject(),
-    headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        'Access-Control-Allow-Headers': '*',
-        'Access-Control-Allow-Credentials': true,
-        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
-        "Access-Control-Allow-Origin" : "*"
-    }
-  }).success(
-    // do something
-    console.log('success')
-  );
-})
-</script>
 <script type="module" src="script.js"></script>
