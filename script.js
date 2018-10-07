@@ -16,7 +16,18 @@ const form = document.forms['submit-to-google-sheet'],
 
 form.addEventListener('submit', e => {
     e.preventDefault()
-    fetch(scriptURL, { method: 'POST', origin: "*", body: new FormData(form)})
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: "cors",
+        body: new FormData(form),
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Credentials': true,
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE',
+            "Access-Control-Allow-Origin" : "*"
+        }
+      })
       .then(response => console.log('Success!', response))
       .catch(error => console.error('Error!', error.message))
 })
